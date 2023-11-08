@@ -28,6 +28,9 @@
           freetype
           gtk3
           libcpr
+          audacity
+
+
           
 
           #vscode extensions
@@ -45,6 +48,7 @@
         echo Audio Plugin Dev
         cmake --version
         clang --version
+        VST_PATH=~/.vst/
       '';
       };
       
