@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+
+# Check if the required parameters are provided
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <name> <code>"
+  exit 1
+fi
+
+name="$1"
+code="$2"
+
+# Check Name is Correct
+# Regular expression to match valid names
+valid_name_regex="^[a-z_]+$"
+
+# Check if the name matches the valid name pattern
+if ! [[ "$name" =~ $valid_name_regex ]]; then
+  echo "Error: Name should only contain lowercase letters and underscores."
+  exit 1
+fi
+
+# Check Code is Correct
+capitalize() {
+  echo "$1" | tr 'a-z' 'A-Z'
+}
+
+capitalized_code=$(capitalize "$code")
+
+if ! [[ "$capitalized_code" =~ ^[A-Z]{4}$ ]]; then
+  echo "Error: Code should be 4 uppercase letters."
+  exit 1
+fi
+
+# Create the different Name types
+get_project_name() {
+  local input="$1"
+  local result=""
+  for ((i = 0; i < ${#input}; i++)); do
+    char="${input:$i:1}"
+    result+="${char^^}"
+  done
+  echo "$result"
+}
+
+get_plugin_name() {
+  local input="$1"
+  local output=""
+
+  # Split the input string by underscores and iterate over the words
+  IFS="_" read -ra words <<< "$input"
+  for word in "${words[@]}"; do
+    # Capitalize the first letter of each word and append to the output
+    output+="${word^}"
+  done
+
+  echo "$output"
+}
+
+project_name=$(get_project_name "$name")
+
+plugin_name=$(get_plugin_name "$name")
+
+
+# Copy over files to new directory
+mkdir $name
+
+# Copy the contents from "audio_plugin_template" to the new submodule (excluding .git directory)
+cp -r audio_plugin_template/* "$name/"
+
+#Ovewrite README
+cat <<EOF > "$name/README.md"
+# $plugin_name
+EOF
+
+# Create the CMakeLists.txt file with the provided content
+cat <<EOF > "$name/CMakeLists.txt"
+cmake_minimum_required(VERSION 3.15)
+
+PROJECT($project_name
+LANGUAGES CXX
+VERSION 0.0.2
+)
+
+# for clang-tidy (this enables finding system header files).
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+endif()
+
+# Enable JUCE. Do not use find_package to prevent mixing up with one globally installed.
+add_subdirectory(\$ENV{PWD}/JUCE /JUCE)
+
+add_subdirectory(src)
+EOF
+
+# Create the Source CMakeLists.txt file
+cat <<EOF > "$name/src/CMakeLists.txt"
+if(DEFINED ENV{AAX_SDK_PATH})
+    set(AAX_SDK_PATH \$ENV{AAX_SDK_PATH})
+endif()
+if(DEFINED AAX_SDK_PATH)
+    set(AAX_BUILD_FLAG AAX)
+    file(TO_CMAKE_PATH "\${AAX_SDK_PATH}" AAX_SDK_CMAKE_PATH)
+    message(STATUS "AAX Build is enabled. AAX SDK = " \${AAX_SDK_CMAKE_PATH})
+    juce_set_aax_sdk_path(\${AAX_SDK_CMAKE_PATH})
+else()
+    message(STATUS "AAX Build is disabled. To enable, set AAX_SDK_PATH to your environment variable or specify -DAAX_SDK_PATH to CMake configure option.")
+endif()
+
+juce_add_plugin($plugin_name
+    # VERSION ...                                     # Set this if the plugin version is different to the project version
+    # ICON_BIG ""   # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
+    #   ICON_SMALL "\${CMAKE_SOURCE_DIR}/Assets/icon16.png " 
+    COMPANY_NAME "ActuallyAdequate"                    # Specify the name of the plugin's author
+    COMPANY_COPYRIGHT "Actually Adequate"
+    COMPANY_WEBSITE "https://actuallyadequate.com/"
+    COMPANY_EMAIL "actuallyadequate@gmail.com"
+    IS_SYNTH FALSE                       # Is this a synth or an effect?
+    # NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
+    # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
+    # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
+    # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
+    # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
+    PLUGIN_MANUFACTURER_CODE ADQT               # A four-character manufacturer id with at least one upper-case character
+    PLUGIN_CODE $captilized_code                           # A unique four-character plugin id with at least one upper-case character
+    FORMATS 
+    # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+            Standalone 
+            AU
+            # AUv3 
+            VST3 
+            # Unity 
+            \${AAX_BUILD_FLAG}               
+    VST3_CATEGORIES "Fx" 
+    AU_MAIN_TYPE "kAudioUnitType_Effect"
+    # AU_SANDBOX_SAFE TRUE
+    # AAX_CATEGORY ""
+    # HARDENED_RUNTIME_ENABLED # macOS app settings
+    # HARDENED_RUNTIME_OPTIONS
+    # APP_SANDBOX_ENABLED
+    # APP_SANDBOX_INHERIT
+    # DESCRIPTION "" #when I set this option, the name of AAX plugin became this description(bug?)
+    MICROPHONE_PERMISSION_ENABLED TRUE
+    MICROPHONE_PERMISSION_TEXT "This application requires permission to use an audio input device of your computer. By Default, Built-In microphone will be used."
+
+    PRODUCT_NAME "$plugin_name")        # The name of the final 
+
+target_compile_features($plugin_name PUBLIC cxx_std_17)
+
+target_compile_definitions($plugin_name
+    PUBLIC
+    # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
+    JUCE_WEB_BROWSER=0  # If you remove this, add \`NEEDS_WEB_BROWSER TRUE\` to the \`juce_add_plugin\` call
+    JUCE_USE_CURL=0     # If you remove this, add \`NEEDS_CURL TRUE\` to the \`juce_add_plugin\` call
+    JUCE_VST3_CAN_REPLACE_VST2=0
+    # JUCE_DISPLAY_SPLASH_SCREEN=0 #if your plugin is distributed with GPL license or paid
+)
+
+juce_add_binary_data(JuceLogoBinary
+SOURCES 
+\${CMAKE_SOURCE_DIR}/assets/logo.svg
+)
+
+target_sources($plugin_name PRIVATE
+    PluginEditor.cpp
+    PluginProcessor.cpp
+)
+
+target_link_libraries($plugin_name PUBLIC
+JuceLogoBinary
+juce::juce_audio_basics
+juce::juce_audio_devices
+juce::juce_audio_formats
+juce::juce_audio_plugin_client
+juce::juce_audio_processors
+juce::juce_audio_utils
+juce::juce_core
+juce::juce_cryptography
+juce::juce_data_structures
+juce::juce_dsp
+juce::juce_events
+juce::juce_graphics
+juce::juce_gui_basics
+juce::juce_gui_extra
+juce::juce_opengl
+juce::juce_product_unlocking
+)
+
+juce_generate_juce_header($plugin_name)
+EOF
