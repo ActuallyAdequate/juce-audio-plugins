@@ -33,8 +33,8 @@
 
           reaper
 
-          pkgsCross.mingwW64.buildPackages.gcc
-          pkgsCross.mingwW64.windows.pthreads                    
+#          pkgsCross.mingwW64.buildPackages.gcc
+ #         pkgsCross.mingwW64.windows.pthreads                    
            
           #vscode extensions
           (vscode-with-extensions.override {

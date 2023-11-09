@@ -11,6 +11,6 @@ set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES )
 endif()
 
 # Enable JUCE. Do not use find_package to prevent mixing up with one globally installed.
-add_subdirectory($ENV{PWD}/JUCE {CMAKE_CURRENT_BINARY_DIR}/JUCE)
+add_subdirectory($ENV{PWD}/JUCE JUCE)
 
 add_subdirectory(src)
