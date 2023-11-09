@@ -35,7 +35,6 @@
 
           pkgsCross.mingwW64.buildPackages.gcc
           pkgsCross.mingwW64.windows.pthreads                    
-          pkgsCross.mingwW64.windows.msvcrt
            
           #vscode extensions
           (vscode-with-extensions.override {
