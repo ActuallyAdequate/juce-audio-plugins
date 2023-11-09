@@ -19,7 +19,7 @@
 
         packages = with pkgs; [
           # Dev tools
-          llvmPackages_11.clang
+          llvmPackages_16.clang
           
           cmakeCurses   
           pkg-config
@@ -39,7 +39,7 @@
           #vscode extensions
           (vscode-with-extensions.override {
             vscodeExtensions = with vscode-extensions; [
-              llvm-vs-code-extensions.vscode-clangd
+#              llvm-vs-code-extensions.vscode-clangd
               ms-vscode.cpptools
               vadimcn.vscode-lldb
               ms-vscode.cmake-tools

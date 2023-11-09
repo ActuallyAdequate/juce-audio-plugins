@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../JUCE/**"
+            ],
+            "defines": [],
+            "compilerPath": "/nix/store/i80k2s7lczrgr7s0dqlh1g9hhbc7gknj-clang-wrapper-16.0.6/bin/clang",
+            "cStandard": "c17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
