@@ -19,7 +19,18 @@ template -> plugin_branch
 plugin_branch -> main
 template -> main
 
+### Testing
+To test the plugins use an appropiate DAW Any DAW can be chosen however here are some notes:
 
+#### Linux
+- Reaper: seems to work.
+- ardour: seems to be be broken on nixos (can't find glibc 2.38)
+- audacity: seems to not support vst3 on linux pr (simliar issue to ardour)
+- waveform: failed to load (likley simliar issue as ardour)
+
+#### Windows (require cross-compile)
+- waveform
+- audacity: (must be 32 bit)
 
 
 ## Setting JUCE version.
@@ -34,3 +45,7 @@ git checkout 7.0.2
 cd ..
 git commit -m "Changed the version of JUCE."
 ```
+
+## Improvements
+Figure out cross compile rather than using windows vm
+Figure out the dumb glibc error

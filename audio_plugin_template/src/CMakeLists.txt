@@ -46,6 +46,9 @@ juce_add_plugin(ExamplePlugin
     MICROPHONE_PERMISSION_ENABLED TRUE
     MICROPHONE_PERMISSION_TEXT "This applicaion requires a permission to use an audio input device of your computer. By Default, Built-In microphone will be used."
 
+    COPY_PLUGIN_AFTER_BUILD TRUE
+    VST3_COPY_DIR /home/harry/.vst/
+
     PRODUCT_NAME "ExamplePlugin")        # The name of the final 
 
 target_compile_features(ExamplePlugin PUBLIC cxx_std_17)

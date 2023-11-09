@@ -50,6 +50,8 @@ Open Debug Menu in left Sidebar. And click Run button on the left in a menu of C
 
 
 
+
+
 ## Resources
 
 [JUCE CMake API Documents](https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md)

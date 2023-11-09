@@ -28,11 +28,15 @@
           freetype
           gtk3
           libcpr
-          audacity
+          webkitgtk
+          pcre
 
+          reaper
 
-          
-
+          pkgsCross.mingwW64.buildPackages.gcc
+          pkgsCross.mingwW64.windows.pthreads                    
+          pkgsCross.mingwW64.windows.msvcrt
+           
           #vscode extensions
           (vscode-with-extensions.override {
             vscodeExtensions = with vscode-extensions; [
@@ -49,6 +53,8 @@
         cmake --version
         clang --version
         VST_PATH=~/.vst/
+        
+        code .
       '';
       };
       

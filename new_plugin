@@ -64,6 +64,11 @@ plugin_name=$(get_plugin_name "$name")
 # Copy over files to new directory
 mkdir $name
 
+# get user direcotry
+user="$USER"
+
+mkdir "$user/.vst/"
+
 # Copy the contents from "audio_plugin_template" to the new submodule (excluding .git directory)
 cp -r audio_plugin_template/* "$name/"
 
@@ -142,6 +147,9 @@ juce_add_plugin($plugin_name
     MICROPHONE_PERMISSION_ENABLED TRUE
     MICROPHONE_PERMISSION_TEXT "This application requires permission to use an audio input device of your computer. By Default, Built-In microphone will be used."
 
+    COPY_PLUGIN_AFTER_BUILD TRUE
+    VST3_COPY_DIR $user/.vst/
+    
     PRODUCT_NAME "$plugin_name")        # The name of the final 
 
 target_compile_features($plugin_name PUBLIC cxx_std_17)
